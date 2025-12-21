@@ -1,32 +1,22 @@
-def sum_for_list(lst):
-    initial_list = lst
-    ans_list = []
+def sum_of_intervals(intervals):
+    intervals = sorted(intervals)
+    interval_length = len(intervals)
+    length = 0
 
-    # 1. 先做質因數分解
-    final_ans_dict = dict()
+    current_start, current_end = intervals[0]
 
-    for n in initial_list:
-        i = abs(n)
-        factor = 2
+    for i in range(1, interval_length):
+        next_start, next_end = intervals[i]
 
-        while factor * factor <= i:  # 代表還有質數可以檢查
+        if next_start < current_end:
+            current_end = max(current_end, next_end)
+        else:
+            length += current_end - current_start
+            current_start = next_start
+            current_end = next_end
 
-            if i % factor == 0:
-                if factor not in final_ans_dict:
-                    final_ans_dict[factor] = 0
-                final_ans_dict[factor] += n
-            while i % factor == 0:
-                i //= factor
-            factor += 1
-
-        if i > 1:
-            if i not in final_ans_dict:
-                final_ans_dict[i] = 0
-            final_ans_dict[i] += n
-
-    ans_list = sorted([[key, value] for key, value in final_ans_dict.items()])
-
-    return ans_list
+    length += current_end - current_start
+    return length
 
 
-print(sum_for_list([15, 21, 24, 30, 45]))
+print(sum_of_intervals([(1, 5), (7, 10)]))
