@@ -1,22 +1,13 @@
-def sum_of_intervals(intervals):
-    intervals = sorted(intervals)
-    interval_length = len(intervals)
-    length = 0
+def longest_slide_down(pyramid):
 
-    current_start, current_end = intervals[0]
+    for i in range(len(pyramid) - 2, -1, -1):
+        for j in range(i+1):
+            print(i, j)
+            left = pyramid[i][j] + pyramid[i+1][j]
+            right = pyramid[i][j] + pyramid[i+1][j+1]
+            pyramid[i][j] = max(left, right)
 
-    for i in range(1, interval_length):
-        next_start, next_end = intervals[i]
-
-        if next_start < current_end:
-            current_end = max(current_end, next_end)
-        else:
-            length += current_end - current_start
-            current_start = next_start
-            current_end = next_end
-
-    length += current_end - current_start
-    return length
+    return pyramid[0][0]
 
 
-print(sum_of_intervals([(1, 5), (7, 10)]))
+print(longest_slide_down([[10], [10, 20], [10, 10, 20], [10, 90, 10, 20]]))
