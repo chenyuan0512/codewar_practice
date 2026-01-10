@@ -1,26 +1,45 @@
-def hamming(n):
-    ans_list = [1]
-    power_2, power_3, power_5 = 0, 0, 0
+def snail(snail_map):
 
-    for i in range(n-1):
+    # n = len(snail_map) # 因為 snail map 是 n * n 的，所以直接這樣寫
 
-        next_r2 = ans_list[power_2] * 2
-        next_r3 = ans_list[power_3] * 3
-        next_r5 = ans_list[power_5] * 5
-        next_row_list = [next_r2, next_r3, next_r5]
+    ans_list = []
 
-        smallest = min(next_row_list)
+    n, top, bottom, left, right = len(
+        snail_map), 0, len(snail_map)-1, 0, len(snail_map)-1
 
-        ans_list.append(smallest)
+    # print(snail_map[0][0:2])  # [1, 2]
 
-        if next_r2 == smallest:
-            power_2 += 1
-        if next_r3 == smallest:
-            power_3 += 1
-        if next_r5 == smallest:
-            power_5 += 1
+    while top <= bottom and left <= right:
+        # print(top, bottom)
 
-    return ans_list[-1]
+        for i in range(left, right+1, 1):
+            element = snail_map[top][i]
+            ans_list.append(element)
+        top += 1
+
+        for i in range(top, bottom+1, 1):
+            element = snail_map[i][right]
+            # print(element)
+            ans_list.append(element)
+        right -= 1
+
+        for i in range(right, left-1, -1):
+            element = snail_map[bottom][i]
+            ans_list.append(element)
+        bottom -= 1
+
+        for i in range(bottom, top-1, -1):
+            element = snail_map[i][left]
+            ans_list.append(element)
+        left += 1
+        # print(top, bottom, left, right)
+        # print(ans_list)
+
+    return ans_list
 
 
-print(hamming(5000))
+array = [[1, 2, 3, 4],
+         [5, 6, 7, 8],
+         [9, 10, 11, 12],
+         [13, 14, 15, 16]]
+print(snail(array))
