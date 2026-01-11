@@ -1,45 +1,38 @@
-def snail(snail_map):
+def format_duration(seconds):
 
-    # n = len(snail_map) # 因為 snail map 是 n * n 的，所以直接這樣寫
+    ans_str = ""
 
+    if seconds == 0:
+        return "now"
+
+    minute = 60
+    hour = minute * 60
+    day = hour * 24
+    year = day * 365
+
+    unit_dict = [("year", year), ("day", day),
+                 ("hour", hour), ("minute", minute), ("second", 1)]
     ans_list = []
 
-    n, top, bottom, left, right = len(
-        snail_map), 0, len(snail_map)-1, 0, len(snail_map)-1
+    for i in range(len(unit_dict)):
+        element = seconds // unit_dict[i][1]
+        seconds %= unit_dict[i][1]
 
-    # print(snail_map[0][0:2])  # [1, 2]
+        if element == 1:
+            ans_list.append(str(element) + " " + unit_dict[i][0])
+        elif element > 1:
+            ans_list.append(str(element) + " " + unit_dict[i][0] + "s")
 
-    while top <= bottom and left <= right:
-        # print(top, bottom)
+    if len(ans_list) == 1:
+        ans_str += ans_list[0]
+    elif len(ans_list) == 2:
+        ans_str += (ans_list[0] + " and " + ans_list[1])
+    else:
+        ans_str += (", ".join(i for i in ans_list[:-1]
+                              ) + " and " + ans_list[-1])
 
-        for i in range(left, right+1, 1):
-            element = snail_map[top][i]
-            ans_list.append(element)
-        top += 1
-
-        for i in range(top, bottom+1, 1):
-            element = snail_map[i][right]
-            # print(element)
-            ans_list.append(element)
-        right -= 1
-
-        for i in range(right, left-1, -1):
-            element = snail_map[bottom][i]
-            ans_list.append(element)
-        bottom -= 1
-
-        for i in range(bottom, top-1, -1):
-            element = snail_map[i][left]
-            ans_list.append(element)
-        left += 1
-        # print(top, bottom, left, right)
-        # print(ans_list)
-
-    return ans_list
+    return ans_str
 
 
-array = [[1, 2, 3, 4],
-         [5, 6, 7, 8],
-         [9, 10, 11, 12],
-         [13, 14, 15, 16]]
-print(snail(array))
+total_time = 15729880
+print(format_duration(total_time))
