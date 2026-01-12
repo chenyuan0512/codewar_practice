@@ -1,38 +1,26 @@
-def format_duration(seconds):
+def dbl_linear(n):
+    ans_list = [1]
 
-    ans_str = ""
+    y_index, z_index = 0, 0
+    
 
-    if seconds == 0:
-        return "now"
+    while len(ans_list) <= n:
+        y = 2 * ans_list[y_index] + 1
+        z = 3 * ans_list[z_index] + 1
 
-    minute = 60
-    hour = minute * 60
-    day = hour * 24
-    year = day * 365
+        if y < z:
+            ans_list.append(y)
+            y_index += 1
+        elif z < y:
+            ans_list.append(z)
+            z_index += 1
+        else:
+            ans_list.append(y)
+            y_index += 1
+            z_index += 1
 
-    unit_dict = [("year", year), ("day", day),
-                 ("hour", hour), ("minute", minute), ("second", 1)]
-    ans_list = []
-
-    for i in range(len(unit_dict)):
-        element = seconds // unit_dict[i][1]
-        seconds %= unit_dict[i][1]
-
-        if element == 1:
-            ans_list.append(str(element) + " " + unit_dict[i][0])
-        elif element > 1:
-            ans_list.append(str(element) + " " + unit_dict[i][0] + "s")
-
-    if len(ans_list) == 1:
-        ans_str += ans_list[0]
-    elif len(ans_list) == 2:
-        ans_str += (ans_list[0] + " and " + ans_list[1])
-    else:
-        ans_str += (", ".join(i for i in ans_list[:-1]
-                              ) + " and " + ans_list[-1])
-
-    return ans_str
+    return ans_list[-1]
 
 
-total_time = 15729880
-print(format_duration(total_time))
+n = 50
+print(dbl_linear(n))
