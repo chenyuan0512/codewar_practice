@@ -1,200 +1,127 @@
-def find_word(board, word):
+class Dinglemouse(object):
+    def __init__(self, queues, capacity):
 
-    states: list = []  # 目前所有候選，(pos, visited)
-    # k: int = 1  # word index
+        self.queues = queues  # queues 是所有樓層所有人要去哪一層的 info
+        self.capacity = capacity  # 電梯最多可以載幾個人
+        self.current_floor = 0  # 目前樓層
+        self.lifted_passengers_list = []
 
-    board_size = len(board)
+        self.visited_list = [self.current_floor]
+        self.direction = 1
 
-    # 先找到第一個字母位置
-    for i in range(board_size):
-        for j in range(board_size):
-            if board[i][j] == word[0]:
-                pos = (i, j)
-                visited = {(i, j)}
-                states.append((pos, visited))
-                # state.append((i, j))
-                # print(i, j)
-                # print(neighbors(i, j))
-    print(f"states: ", states)
-    if len(states) == 0:
-        return False
+    # 先把 queue 從 tuple 轉 list
+    # 因為 tuple 是固定值，不能更動
 
-    # neighbor_list = neighbors(r, c, board)
-    for k in range(1, len(word)):
-        new_states: list = []  # 下一輪候選
+    def _tuple_to_index(self):
+        self.queues_list = [list(i) for i in self.queues]
+        # self.queues_list_copy = self.queues_list.copy()
 
-        for i in range(len(states)):
-            print(states)
-            pos = states[i][0]
-            visited = states[i][1]
-            r, c = pos
+    # 出去
+    def _leave(self):
+        self.lifted_passengers_list = [
+            p for p in self.lifted_passengers_list if p != self.current_floor]
+        self._record_visited_floor()
 
-            neighbor_list = neighbors(r, c, board)
-            # print(f"r, c:", r, c)
-            # print(f"pos = ", pos)
-            # print(f"neighbor_list:", neighbor_list)
+    # 針對等電梯的乘客判斷往上或往下
+    def _go_in(self, queue_list):
+        for target_floor in list(queue_list):
+            if len(self.lifted_passengers_list) < self.capacity:
+                if (self.direction > 0 and target_floor > self.current_floor) or (self.direction < 0 and target_floor < self.current_floor):
+                    # print("target floor", target_floor)
+                    # print("current floor", self.current_floor)
+                    self.lifted_passengers_list.append(target_floor)
+                    self.queues_list[self.current_floor].remove(target_floor)
+                    self._record_visited_floor()
 
-            for a in neighbor_list:
-                # 第二個字母
-                if a[0] == word[k] and (a[1], a[2]) not in visited:
-                    visited2 = visited.copy()
-                    neighbor_pos = (a[1], a[2])
-                    visited2.add(neighbor_pos)
-                    # print(f"visited2:", visited2)
-                    # overlap_list.append((a[1], a[2]))
-                    new_states.append(((a[1], a[2]), visited2))
-            print(f"new_state:", new_states)
-        if len(new_states) == 0:
-            return False
-        else:
-            states = new_states
-    return True
+    # 紀錄目前樓層
+    def _record_visited_floor(self):
+        if self.current_floor != self.visited_list[-1]:
+            self.visited_list.append(self.current_floor)
 
-    # for k in range(1, len(word)):
-    #     new_state = []
-    #     for i in range(len(visited)):
-    #         r = visited[i][0]
-    #         c = visited[i][1]
+    def _next_floor(self):
+        while True:
+            empty = 0
+            for i in self.queues_list:
+                if i == []:
+                    empty += 1
+                if empty == len(self.queues_list) and self.lifted_passengers_list == []:
+                    self.current_floor = 0
+                    self._record_visited_floor()
+                    return self.visited_list
 
-    #         neighbor_list = neighbors(r, c, board)
-    #         print(f"r, c :", r, c)
-    #         print(f"neighbor_list: ", neighbor_list)
+            # 現在改成每個樓層都停下來檢查
 
-    #         for a in neighbor_list:
-    #             if a[0] == word[k] and (a[1], a[2]) not in visited:
-    #                 visited2 = visited.copy()
-    #                 visited2.append((a[1], a[2]))
-    #                 # overlap_list.append((a[1], a[2]))
-    #                 new_state.append(((a[1], a[2]), visited2))
-    #                 print(f"new_state: ", new_state)
+            # 檢查有沒有人要出去
+            if self.current_floor in self.lifted_passengers_list:
+                self._leave()
 
-    #     if new_state is None:
-    #         return False
-    #     else:
-    #         visited = new_state
+            # 檢查有沒有人要進來
+            if len(self.queues_list[self.current_floor]) != 0:
+                self._go_in(self.queues_list[self.current_floor])
 
-    # for a in neighbor_list:
-    #     if a[0] == word[1]:
-    #         r = a[1]
-    #         c = a[2]
-    #         overlap_list.append((r, c))
-    # if len(overlap_list) == 0:
-    #     return False
+            self.current_floor += self.direction
 
-    # overlap_list = []
-    # neighbor_list = neighbors(r, c, board)
+            if self.current_floor >= len(self.queues_list) - 1:
+                self.current_floor = len(self.queues_list) - 1
+                self.direction = -1
 
-    # for a in neighbor_list:
-    #     if a[0] == word[2]:
-    #         r = a[1]
-    #         c = a[2]
-    #         overlap_list.append((r, c))
-    #     else:
-    #         return False
+            elif self.current_floor <= 0:
+                self.current_floor = 0
+                self.direction = 1
 
-    # for j in range(len(first_word_pos)):
-    #     overlap_list = []
-    #     for word_index in range(1, len(word)):
+            # print("copy of queue list", self.queues_list_copy)
+            # print("current floor", self.current_floor)
+            # print("target_floor: ", self.target_floor_list)
+            # print("number_inside_elevator: ", self.lift_passengers_list)
+            # print("visited list: ", empty, self.visited_list)
 
-    #         r = first_word_pos[j][0]
-    #         c = first_word_pos[j][1]
+        # for floor_index in range(len(self.queues_list)):
 
-    #         neighbor_list = neighbors(r, c, board)
+        #     # 在 floor_index 排隊的人有 queue_people 個
+        #     queue_people = len(self.queues_list[floor_index])
+        #     self.current_floor = floor_index
+        #     print(queue_people)
 
-    #         for k in neighbor_list:
-    #             if k[0] == word[word_index]:
-    #                 overlap_list.append((k[1], k[2]))
+        #     if queue_people == 0:
+        #         continue
+        #     else:
 
-    #         return overlap_list
+        #         for queue_index in range(queue_people):  # 排在第 queue_index 個
+        #             print(queue_index)
+        #             if self.number_inside_elevator < self.capacity:  # 先檢查電梯滿了沒
+        #                 # 沒滿: 第一個進去 ➡️ 電梯人數+1 / 第 queue_index 個離開
+        #                 self.number_inside_elevator += 1
 
-    # for i in range(len(first_word_pos)):
-    #     r = first_word_pos[i][0]
-    #     c = first_word_pos[i][1]
-    #     visited = [(r, c)]
+        #                 if self.queues_list[floor_index][0] not in self.target_floor_list and self.queues_list[floor_index][0] > self.current_floor:
+        #                     self.target_floor_list.append(
+        #                         self.queues_list[floor_index][0])
+        #                 self.queues_list[floor_index] = self.queues_list[floor_index][queue_index:]
+    # go to target floor
 
-    #     word_index = 1
+    def theLift(self):
+        self._tuple_to_index()
+        visited = self._next_floor()
+        # print("current floor", self.current_floor)
+        # print("target_floor: ", self.target_floor_list)
+        # print("number_inside_elevator: ", self.lift_passengers_list)
+        print("visited: ", visited)
 
-    #     print(f"第一個 for 迴圈執行第 {i + 1} 次")
-
-    #     # for word_index in range(1, len(word)):
-
-    #     neighbor_arr = neighbors(r, c, board)
-
-    #     overlap_list = []
-
-    #     for j in neighbor_arr:
-    #         # if j[0] == word[word_index] and (j[1], j[2]) not in visited:
-    #         r = j[1]
-    #         c = j[2]
-    #         if board[r][c] == word[word_index]:
-    #             overlap_list.append((r, c))
-
-    #         repeat_list = []
-
-    #         repeat_list.append((r, c))
-
-    #     for re in repeat_list:
-
-    #         print(f"第 {j} 次的append {r, c}")
-    #         visited.append((r, c))
-    #         if len(visited) == len(word):
-    #             return True
-    #         break
-
-    # print(visited)
-
-    # if len(visited) != len(word):
-    #     return False
-    # return True
+        # print(self.queues)
+        # self._next_floor()
+        return visited
 
 
-def can_finish(r, c, visited, board, word, k):
-    # 要先知道現在是第幾個，是第 k 個
-    for i in range(k, len(word)):
-        neighbor_arr = neighbors(r, c, board)
-        visited.append((r, c))
-        return True
-
-
-def neighbors(r, c, board):
-    r_front, r_end = 0, 0
-    c_front, c_end = 0, 0
-
-    neighbor_array = []
-    board_size = len(board)
-
-    if r == 0:
-        r_front = r
-        r_end = 1
-
-    else:
-        r_front = r - 1
-        r_end = r + 1 if r + 1 < board_size else r
-
-    if c == 0:
-        c_front = c
-        c_end = 1
-    else:
-        c_front = c - 1
-        c_end = c + 1 if c+1 < board_size else c
-
-    for i in range(r_front, r_end + 1):
-        for j in range(c_front, c_end + 1):
-            if i == r and j == c:
-                pass
-            else:
-                neighbor_array.append((board[i][j], i, j))
-
-    # print(neighbor_array)
-    return neighbor_array
-
-
-testBoard = [
-    ["E", "A", "R", "A"],
-    ["N", "L", "E", "C"],
-    ["I", "A", "I", "S"],
-    ["B", "Y", "O", "R"]
+# Floors:    G     1      2        3     4      5      6         Answers:
+tests = [
+    [((),   (),    (5, 5, 5), (),   (),    (),    ()),     [0, 2, 5, 0]],
+    [((),   (),    (1, 1),   (),   (),    (),    ()),     [0, 2, 1, 0]],
+    [((),   (3,),  (4,),    (),   (5,),  (),    ()),     [0, 1, 2, 3, 4, 5, 0]],
+    [((),   (0,),  (),      (),   (2,),  (3,),  ()),     [0, 5, 4, 3, 2, 1, 0]],
+    [((),   (6, 6, 6, 5, 0, 0, 0, 0, 0, 0,),  (),  (),   (),
+      (1, 1, 1, 1, 0, ),  (5,)),     [0, 5, 4, 3, 2, 1, 0]]
 ]
-word1 = "BAILER"
 
-print(find_word(testBoard, word1))
+for queues, answer in tests:
+    # print(queues)
+    lift = Dinglemouse(queues, 5)
+    lift.theLift()
