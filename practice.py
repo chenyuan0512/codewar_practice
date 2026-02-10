@@ -22,15 +22,6 @@ class Dinglemouse(object):
             p for p in self.lifted_passengers_list if p != self.current_floor]
         self._record_visited_floor()
 
-    # 針對等電梯的乘客判斷往上或往下
-    def _go_in(self, queue_list):
-        if len(self.lifted_passengers_list) < self.capacity:
-                    # print("target floor", target_floor)
-                    # print("current floor", self.current_floor)
-                    self.lifted_passengers_list.append(target_floor)
-                    self.queues_list[self.current_floor].remove(target_floor)
-        self._record_visited_floor()
-
     # 紀錄目前樓層
     def _record_visited_floor(self):
         if self.current_floor != self.visited_list[-1]:
@@ -73,34 +64,6 @@ class Dinglemouse(object):
                 self.current_floor = 0
                 self.direction = 1
 
-            # print("copy of queue list", self.queues_list_copy)
-            # print("current floor", self.current_floor)
-            # print("target_floor: ", self.target_floor_list)
-            # print("number_inside_elevator: ", self.lift_passengers_list)
-            # print("visited list: ", empty, self.visited_list)
-
-        # for floor_index in range(len(self.queues_list)):
-
-        #     # 在 floor_index 排隊的人有 queue_people 個
-        #     queue_people = len(self.queues_list[floor_index])
-        #     self.current_floor = floor_index
-        #     print(queue_people)
-
-        #     if queue_people == 0:
-        #         continue
-        #     else:
-
-        #         for queue_index in range(queue_people):  # 排在第 queue_index 個
-        #             print(queue_index)
-        #             if self.number_inside_elevator < self.capacity:  # 先檢查電梯滿了沒
-        #                 # 沒滿: 第一個進去 ➡️ 電梯人數+1 / 第 queue_index 個離開
-        #                 self.number_inside_elevator += 1
-
-        #                 if self.queues_list[floor_index][0] not in self.target_floor_list and self.queues_list[floor_index][0] > self.current_floor:
-        #                     self.target_floor_list.append(
-        #                         self.queues_list[floor_index][0])
-        #                 self.queues_list[floor_index] = self.queues_list[floor_index][queue_index:]
-    # go to target floor
 
     def theLift(self):
         self._tuple_to_index()
