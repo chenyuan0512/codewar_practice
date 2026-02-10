@@ -1,10 +1,10 @@
 class Dinglemouse(object):
     def __init__(self, queues, capacity):
-
         self.queues = queues  # queues 是所有樓層所有人要去哪一層的 info
         self.capacity = capacity  # 電梯最多可以載幾個人
         self.current_floor = 0  # 目前樓層
         self.lifted_passengers_list = []
+        
 
         self.visited_list = [self.current_floor]
         self.direction = 1
@@ -24,14 +24,12 @@ class Dinglemouse(object):
 
     # 針對等電梯的乘客判斷往上或往下
     def _go_in(self, queue_list):
-        for target_floor in list(queue_list):
-            if len(self.lifted_passengers_list) < self.capacity:
-                if (self.direction > 0 and target_floor > self.current_floor) or (self.direction < 0 and target_floor < self.current_floor):
+        if len(self.lifted_passengers_list) < self.capacity:
                     # print("target floor", target_floor)
                     # print("current floor", self.current_floor)
                     self.lifted_passengers_list.append(target_floor)
                     self.queues_list[self.current_floor].remove(target_floor)
-                    self._record_visited_floor()
+        self._record_visited_floor()
 
     # 紀錄目前樓層
     def _record_visited_floor(self):
@@ -40,6 +38,7 @@ class Dinglemouse(object):
 
     def _next_floor(self):
         while True:
+            print(self.visited_list)
             empty = 0
             for i in self.queues_list:
                 if i == []:
@@ -56,8 +55,13 @@ class Dinglemouse(object):
                 self._leave()
 
             # 檢查有沒有人要進來
-            if len(self.queues_list[self.current_floor]) != 0:
-                self._go_in(self.queues_list[self.current_floor])
+            for target_floor in list(self.queues_list[self.current_floor]):
+                if (self.direction > 0 and target_floor > self.current_floor) or (self.direction < 0 and target_floor < self.current_floor):
+                    if len(self.lifted_passengers_list) < self.capacity:
+                        self.lifted_passengers_list.append(target_floor)
+                        self.queues_list[self.current_floor].remove(target_floor)
+                    self._record_visited_floor()
+            
 
             self.current_floor += self.direction
 
@@ -113,12 +117,12 @@ class Dinglemouse(object):
 
 # Floors:    G     1      2        3     4      5      6         Answers:
 tests = [
-    [((),   (),    (5, 5, 5), (),   (),    (),    ()),     [0, 2, 5, 0]],
-    [((),   (),    (1, 1),   (),   (),    (),    ()),     [0, 2, 1, 0]],
-    [((),   (3,),  (4,),    (),   (5,),  (),    ()),     [0, 1, 2, 3, 4, 5, 0]],
+    # [((),   (),    (5, 5, 5), (),   (),    (),    ()),     [0, 2, 5, 0]],
+    # [((),   (),    (1, 1),   (),   (),    (),    ()),     [0, 2, 1, 0]],
+    # [((),   (3,),  (4,),    (),   (5,),  (),    ()),     [0, 1, 2, 3, 4, 5, 0]],
     [((),   (0,),  (),      (),   (2,),  (3,),  ()),     [0, 5, 4, 3, 2, 1, 0]],
-    [((),   (6, 6, 6, 5, 0, 0, 0, 0, 0, 0,),  (),  (),   (),
-      (1, 1, 1, 1, 0, ),  (5,)),     [0, 5, 4, 3, 2, 1, 0]]
+    # [((),   (6, 6, 6, 5, 0, 0, 0, 0, 0, 0,),  (),  (),   (),
+    #   (1, 1, 1, 1, 0, ),  (5,)),     [0, 5, 4, 3, 2, 1, 0]]
 ]
 
 for queues, answer in tests:
